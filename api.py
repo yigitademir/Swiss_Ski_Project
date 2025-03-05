@@ -24,8 +24,8 @@ payload = {
 headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
 try:
-    response = requests.post(url, data=payload, headers=headers)
-    response.raise_for_status()  # Raises an HTTPError if the request fails
+    response = requests.post(url, data=payload, headers=headers, timeout=15)
+    response.raise_for_status()  
     data = response.json()
     access_token = data.get("access_token")
 
@@ -46,6 +46,6 @@ try:
     response = requests.get(api_url, headers=headers)
     response.raise_for_status()  
 
-    print("API Response:", response.json())  
+    print(f"Authentication Request Status Code: {response.status_code}")  
 except requests.exceptions.RequestException as e:
     print("Error fetching API data:", e)
