@@ -1,0 +1,32 @@
+api_info:
+  client_secret: 24A6bb_FBxMfc7
+  password: Endurance_4pp
+  username: martin.rumo@hslu.ch
+ergometer:
+- SRM
+gear_check:
+- 5
+- 9
+lactate_analyser:
+- Biosen C Line
+protocol:
+- Alpine Skiing Women
+- Alpine Skiing Men
+- Other
+sampling_point:
+- Earlobes
+srm_offset:
+- true
+- false
+state_of_mind:
+  end: 10
+  start: 1
+test_by:
+- Marine Oberson
+- "Bj\xF6rn Bruhin"
+- Other
+test_conditions:
+- aabb
+training:
+  end: 10
+  start: 1
