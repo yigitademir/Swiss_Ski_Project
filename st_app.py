@@ -1,5 +1,9 @@
+import numpy as np
+import pandas as pd
 import streamlit as st
 import yaml
+import json
+import math
 
 class YamlManager:
     def __init__(self, file_path):
@@ -39,7 +43,6 @@ class YamlManager:
             # Update the in-memory data so it stays in sync
             self.data = data
 
-
 class SwissSkiApp:
     def __init__(self, config_path: str, app_name: str):
         """
@@ -60,6 +63,7 @@ class SwissSkiApp:
         self.show_personal_data()
         self.show_test_conditions()
         self.show_protocol()
+        self.upload_files()
 
     def show_personal_data(self):
         """
@@ -175,6 +179,57 @@ class SwissSkiApp:
         st.selectbox("Lactate Analyser", self.config_data['lactate_analyser'])
         st.selectbox("Sampling Point", self.config_data['sampling_point'])
         st.selectbox("Ergometer", self.config_data['ergometer'])
+
+    def upload_files(self):
+
+        st.subheader("Endurance Test Files")
+
+        # HR Data
+        heart_rate_file = st.file_uploader("HR Data to upload", type="csv")
+
+        if heart_rate_file is not None:
+            # read the csv file into a pandas DataFrame
+            df_hr = pd.read_csv(heart_rate_file, header=None)
+            # Access HR measurements
+            hr_data = df_hr.iloc[20:, 0]  # Heart rate values starting from row 21
+            hr_data_relevant = hr_data[440:]  # Skip first 7 minutes - 420 sec
+            hr_data_relevant_list = hr_data_relevant.tolist()  # converting series to list
+            hr_data_relevant_list = [float(value.strip(';')) for value in hr_data_relevant_list]  # removing ;
+            print(hr_data_relevant_list)
+
+            duration = len(hr_data_relevant_list)  # duration of the measurements
+            window_size = 30  # Last 30 seconds of each 3-min interval
+            interval_size = 180  # length of 3-min interval
+            no_of_levels = math.ceil(duration / interval_size)  # rounding up
+            hr_test_values = []
+
+            for i in range(0, no_of_levels):
+                # Calculate the start and end index for the last 30 sec of the current 3-min interval
+                start_index = (i + 1) * interval_size - window_size
+                end_index = (i + 1) * interval_size
+
+                # Ensure that the slice doesn't go beyond the length of the data
+                if end_index > len(hr_data_relevant_list):
+                    end_index = len(hr_data_relevant_list)
+                    start_index = max(0, end_index - window_size)
+
+                last_30_sec = hr_data[start_index:end_index]
+                print(last_30_sec)
+                last_30_sec_list = last_30_sec.tolist()  # converting to list
+                last_30_sec_list = [float(value.strip(';')) for value in last_30_sec_list]  # removing ;
+                avg_hr = np.mean(last_30_sec_list)
+                hr_test_values.append({
+                    "Level": i + 1,
+                    "Average HR": round(avg_hr, 2),
+                })
+
+            hr_data_json = json.dumps(hr_test_values)
+            st.write(hr_data_json)
+
+        # Spiro Data
+        spiro_file = st.file_uploader("Spiro Data to upload", type="xls")
+
+
 
 
 # Typical pattern to run the Streamlit app
